@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: Apache-2.0
+title: Bosch BMA530 Accelerometer
+description: 3-axis low-g accelerometer with I2C/I3C/SPI interface
+compatible: "bosch,bma530"
+
+include: [sensor-device.yaml, i2c-device.yaml]
+
+properties:
+  reg:
+    required: true
+
+  int1-gpios:
+    type: phandle-array
+    required: false
+    description: INT1 pin
+
+  int2-gpios:
+    type: phandle-array
+    required: false
+    description: INT2 pin
+
+  odr:
+    type: int
+    required: false
+    description: Output data rate in Hz 
+
+  range:
+    type: int
+    required: false
+    description: Full-scale range in g (2, 4, 8, 16)

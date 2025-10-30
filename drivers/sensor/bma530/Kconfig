@@ -1,0 +1,23 @@
+menuconfig SENSOR_BMA530
+    bool "Bosch BMA530 accelerometer"
+    depends on I2C && SENSOR
+    help
+      Enable support for the Bosch BMA530 accelerometer over I2C.
+
+if SENSOR_BMA530
+
+config SENSOR_BMA530_TRIGGER
+    bool "Enable interrupts (sensor_trigger)"
+    depends on GPIO
+
+config SENSOR_BMA530_ODR_DEFAULT
+    int "Default ODR (Hz)"
+    default 100
+    range 1 6400
+
+config SENSOR_BMA530_RANGE_DEFAULT
+    int "Default full-scale (g)"
+    default 8
+    range 2 16
+
+endif

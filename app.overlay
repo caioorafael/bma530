@@ -1,0 +1,37 @@
+&pinctrl {
+    i2c0_default: i2c0_default {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 2)>,   /* SDA P0.02 */
+                    <NRF_PSEL(TWIM_SCL, 0, 28)>;  /* SCL P0.28 */
+        };
+    };
+    i2c0_sleep: i2c0_sleep {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 2)>,
+                    <NRF_PSEL(TWIM_SCL, 0, 28)>;
+            low-power-enable;
+        };
+    };
+};
+
+&i2c0 {
+    status = "okay";
+    pinctrl-0 = <&i2c0_default>;
+    pinctrl-1 = <&i2c0_sleep>;
+    pinctrl-names = "default", "sleep";
+
+    bma530@18 {
+        status = "okay";
+        compatible = "bosch,bma530";
+        reg = <0x18>;
+        label = "BMA530";
+
+        /* Initial Config, odr and range */
+        odr = <100>;
+        range = <8>;
+
+        /* INT1 = P0.10, INT2 = P0.09 */
+        int1-gpios = <&gpio0 10 GPIO_ACTIVE_HIGH>;
+        int2-gpios = <&gpio0  9 GPIO_ACTIVE_HIGH>;
+    };
+};
