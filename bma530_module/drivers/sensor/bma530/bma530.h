@@ -136,9 +136,9 @@ struct bma530_config {
 	// TODO: Add Kconfig based defaults here (e.g., default_range, default_odr), now it is done in dts file.
 };
 
-#if DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c)
+
 extern const struct bma530_bus_io bma530_i2c_bus_ops;
-#endif
+
 
 #ifdef CONFIG_SENSOR_BMA530_TRIGGER
 int bma530_trigger_init(const struct device *dev);

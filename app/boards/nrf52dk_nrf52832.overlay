@@ -20,7 +20,7 @@
     pinctrl-1 = <&i2c0_sleep>;
     pinctrl-names = "default", "sleep";
 
-    bma530@18 {
+    bma530: bma530@18 {
         status = "okay";
         compatible = "bosch,bma530";
         reg = <0x18>;

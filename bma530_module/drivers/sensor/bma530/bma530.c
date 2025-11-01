@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#define DT_DRV_COMPAT bosch_bma530
-
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/sensor.h>
@@ -12,47 +10,52 @@
 #include <zephyr/sys/byteorder.h>
 #include <zephyr/sys/__assert.h>
 #include <zephyr/logging/log.h>
-
 #include "bma530.h"
+
+#define DT_DRV_COMPAT bosch_bma530
+
+#if DT_NUM_INST_STATUS_OKAY(DT_DRV_COMPAT) == 0
+#warning "BMA530 driver enabled without any devices in devicetree"
+#endif
 
 LOG_MODULE_REGISTER(bma530, CONFIG_SENSOR_LOG_LEVEL);
 
-/* Convert raw temperature to Celsius */
-static void bma530_convert_temp(int8_t raw_temp, struct sensor_value *val)
-{
-	// Formula: Temp_C = raw_temp * 1K/LSB + 23C [cite: 181, 2559]
-	float temp_c = (float)raw_temp * BMA530_TEMP_LSB_PER_K + BMA530_TEMP_OFFSET_DEG_C;
-	sensor_value_from_float(val, temp_c);
-}
+// /* Convert raw temperature to Celsius */
+// static void bma530_convert_temp(int8_t raw_temp, struct sensor_value *val)
+// {
+// 	// Formula: Temp_C = raw_temp * 1K/LSB + 23C [cite: 181, 2559]
+// 	float temp_c = (float)raw_temp * BMA530_TEMP_LSB_PER_K + BMA530_TEMP_OFFSET_DEG_C;
+// 	sensor_value_from_float(val, temp_c);
+// }
 
-/* Convert raw acceleration to m/s^2 */
-static int bma530_convert_accel(int16_t raw_val, uint8_t range_reg, struct sensor_value *val)
-{
-	float sensitivity; // LSB/g
+// /* Convert raw acceleration to m/s^2 */
+// static int bma530_convert_accel(int16_t raw_val, uint8_t range_reg, struct sensor_value *val)
+// {
+// 	float sensitivity; // LSB/g
 
-	switch (range_reg) {
-	case BMA530_RANGE_2G:
-		sensitivity = 16384.0f; // [cite: 90]
-		break;
-	case BMA530_RANGE_4G:
-		sensitivity = 8192.0f; // [cite: 94]
-		break;
-	case BMA530_RANGE_8G:
-		sensitivity = 4096.0f; // [cite: 97]
-		break;
-	case BMA530_RANGE_16G:
-		sensitivity = 2048.0f; // [cite: 101]
-		break;
-	default:
-		LOG_ERR("Invalid range selected");
-		return -EINVAL;
-	}
+// 	switch (range_reg) {
+// 	case BMA530_RANGE_2G:
+// 		sensitivity = 16384.0f; // [cite: 90]
+// 		break;
+// 	case BMA530_RANGE_4G:
+// 		sensitivity = 8192.0f; // [cite: 94]
+// 		break;
+// 	case BMA530_RANGE_8G:
+// 		sensitivity = 4096.0f; // [cite: 97]
+// 		break;
+// 	case BMA530_RANGE_16G:
+// 		sensitivity = 2048.0f; // [cite: 101]
+// 		break;
+// 	default:
+// 		LOG_ERR("Invalid range selected");
+// 		return -EINVAL;
+// 	}
 
-	// Formula: Accel_g = raw_val / sensitivity
-	// Convert g to m/s^2: Accel_ms2 = Accel_g * SENSOR_G
-	double accel_ms2 = (double)raw_val / sensitivity * SENSOR_G;
-	return sensor_value_from_double(val, accel_ms2);
-}
+// 	// Formula: Accel_g = raw_val / sensitivity
+// 	// Convert g to m/s^2: Accel_ms2 = Accel_g * SENSOR_G
+// 	double accel_ms2 = (double)raw_val / sensitivity * SENSOR_G;
+// 	return sensor_value_from_double(val, accel_ms2);
+// }
 
 /* Fetch samples from the sensor */
 static int bma530_sample_fetch(const struct device *dev, enum sensor_channel chan)
@@ -359,15 +362,16 @@ int bma530_trigger_set(const struct device *dev,
 #define BMA530_DEFINE_I2C(inst)								\
 	static struct bma530_data bma530_data_##inst;					\
 	static const struct bma530_config bma530_config_##inst = {		\
-		.i2c = I2C_DT_SPEC_INST_GET(inst),				        \
-		.bus = &bma530_i2c_bus_ops,					                \
+		.i2c = I2C_DT_SPEC_INST_GET(inst),				            \
+		.bus = &bma530_i2c_bus_ops,					\
 		IF_ENABLED(CONFIG_SENSOR_BMA530_TRIGGER, (			    \
 			.int1_gpio = GPIO_DT_SPEC_INST_GET_OR(inst, int1_gpios, {0}), \
 			.int2_gpio = GPIO_DT_SPEC_INST_GET_OR(inst, int2_gpios, {0}), \
 		))								                            \
 		/* Initialize Kconfig defaults here */				        \
-	};									                            \
-	SENSOR_DEVICE_DT_INST_DEFINE(inst, bma530_init, NULL,			\
+	};																    \
+	SENSOR_DEVICE_DT_INST_DEFINE(inst, 								\
+		bma530_init, NULL,			\
 			      &bma530_data_##inst, &bma530_config_##inst,	\
 			      POST_KERNEL, CONFIG_SENSOR_INIT_PRIORITY,		\
 			      &bma530_api_funcs);

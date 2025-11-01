@@ -1,0 +1,3 @@
+if SENSOR
+rsource "bma530/Kconfig"
+endif

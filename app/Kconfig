@@ -1,0 +1,8 @@
+menu "BMA530 App"
+source "Kconfig.zephyr"
+endmenu
+
+module = BMA530_APP
+module-str= BMA530_APP
+source "subsys/logging/Kconfig.template.log_config"
+

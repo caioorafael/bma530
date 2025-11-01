@@ -1,0 +1,1 @@
+add_subdirectory_ifdef(CONFIG_SENSOR_BMA530 bma530)

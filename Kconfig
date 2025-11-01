@@ -1,7 +1,0 @@
-mainmenu "BMA530 App"
-
-source "Kconfig.zephyr"
-
-menu "Out-of-tree drivers"
-rsource "drivers/sensor/bma530/Kconfig"
-endmenu
